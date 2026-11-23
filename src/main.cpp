@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationVersion(QStringLiteral("1.0.0"));
 
     // Set application icon from bundled resource
-    app.setWindowIcon(QIcon(QStringLiteral(":/images/Mojito Key Icon.png")));
+    app.setWindowIcon(QIcon(QStringLiteral(":/images/mojito_icon_transparent_trimmed.png")));
 
     WebAPI api;
     MainWindow window(&api);

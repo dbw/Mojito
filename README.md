@@ -1,6 +1,6 @@
 # License Creator
 
-![License Creator Header](images/Mojito%20Key%20Cocktail%20Icon.png)
+![Mojito Header](images/mojito_cocktail_icon_transparent_trimmed.png)
 
 A portable Qt application for creating and reviewing license keys using the
 LimeLM WebAPI.
