@@ -84,8 +84,8 @@ private:
     bool m_busy = false;
 
     // Connection area
-    QLineEdit *m_apiKeyEdit = nullptr;
-    QCheckBox *m_showKeyCheck = nullptr;
+    QLabel *m_apiKeyLabel = nullptr;
+    QPushButton *m_settingsButton = nullptr;
     QComboBox *m_productCombo = nullptr;
     QComboBox *m_versionCombo = nullptr;
     QPushButton *m_refreshProductsButton = nullptr;

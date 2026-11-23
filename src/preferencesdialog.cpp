@@ -104,6 +104,7 @@ void PreferencesDialog::onApply()
                    "LimeLM API keys are typically 32+ alphanumeric characters.\n"
                    "You can still save it, but you may want to verify it."));
         }
+    }
 
     emit apiKeyChanged(key);
     // Do not close the dialog - just apply the changes

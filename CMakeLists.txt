@@ -38,6 +38,7 @@ add_executable(license_creator
     include/webapi.h
     include/preferencesdialog.h
     resources.qrc
+    resources.rc
 )
 
 # Link Qt6 libraries

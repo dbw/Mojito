@@ -69,7 +69,7 @@ MainWindow::MainWindow(WebAPI *api, QWidget *parent)
     statusBar()->showMessage(tr("Ready"));
 
     // Load the product list automatically when an API key is available.
-    if (!m_apiKeyEdit->text().trimmed().isEmpty())
+    if (m_api && m_api->hasAPIKey())
         QTimer::singleShot(0, this, &MainWindow::onRefreshProducts);
 }
 
@@ -93,19 +93,20 @@ void MainWindow::buildUi()
     auto *connectionForm = new QFormLayout(connectionGroup);
     connectionForm->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
 
-    m_apiKeyEdit = new QLineEdit(connectionGroup);
-    m_apiKeyEdit->setEchoMode(QLineEdit::Password);
-    m_apiKeyEdit->setPlaceholderText(tr("Paste your LimeLM API key"));
-    m_showKeyCheck = new QCheckBox(tr("Show"), connectionGroup);
+    // API key is managed via the Settings dialog (Help → Settings)
+    m_apiKeyLabel = new QLabel(tr("API key: not configured"), connectionGroup);
+    m_apiKeyLabel->setStyleSheet("color: gray;");
+    m_settingsButton = new QPushButton(tr("Settings..."), connectionGroup);
+    connect(m_settingsButton, &QPushButton::clicked, this,
+            &MainWindow::onSettings);
 
-    auto *keyContainer = new QWidget(connectionGroup);
-    auto *keyLayout = new QHBoxLayout(keyContainer);
-    keyLayout->setContentsMargins(0, 0, 0, 0);
-    keyLayout->setSpacing(6);
-    keyLayout->addWidget(m_apiKeyEdit, 1);
-    keyLayout->addWidget(m_showKeyCheck);
-    keyContainer->setFocusProxy(m_apiKeyEdit);
-    connectionForm->addRow(tr("&API key:"), keyContainer);
+    auto *settingsContainer = new QWidget(connectionGroup);
+    auto *settingsLayout = new QHBoxLayout(settingsContainer);
+    settingsLayout->setContentsMargins(0, 0, 0, 0);
+    settingsLayout->setSpacing(6);
+    settingsLayout->addWidget(m_apiKeyLabel, 1);
+    settingsLayout->addWidget(m_settingsButton);
+    connectionForm->addRow(tr("&Settings:"), settingsContainer);
 
     m_productCombo = new QComboBox(connectionGroup);
     m_productCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
@@ -260,12 +261,8 @@ void MainWindow::buildUi()
     //---------------------------------------------------------------------
     // Signal wiring
     //---------------------------------------------------------------------
-    connect(m_apiKeyEdit, &QLineEdit::textChanged, this,
-            &MainWindow::onApiKeyChanged);
-    connect(m_showKeyCheck, &QCheckBox::toggled, this, [this](bool visible) {
-        m_apiKeyEdit->setEchoMode(visible ? QLineEdit::Normal
-                                          : QLineEdit::Password);
-    });
+    // API key is now managed via the Settings dialog (Help → Settings)
+    // m_showKeyCheck removed - API key is now managed via Settings dialog
     connect(m_refreshProductsButton, &QPushButton::clicked, this,
             &MainWindow::onRefreshProducts);
     connect(m_productCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
@@ -350,8 +347,11 @@ void MainWindow::restoreSettings()
     QSettings settings(settingsPath(), QSettings::IniFormat);
 
     const QString apiKey = settings.value(QStringLiteral("apiKey")).toString();
-    if (!apiKey.isEmpty())
-        m_apiKeyEdit->setText(apiKey);
+    if (!apiKey.isEmpty()) {
+        if (m_api)
+            m_api->setAPIKey(apiKey);
+        onApiKeyChanged(apiKey);
+    }
 
     m_emailEdit->setText(settings.value(QStringLiteral("customerEmail")).toString());
     m_numKeysSpin->setValue(settings.value(QStringLiteral("numKeys"), 1).toInt());
@@ -378,7 +378,7 @@ void MainWindow::saveSettings()
     QSettings settings(settingsPath(), QSettings::IniFormat);
 
     settings.setValue(QStringLiteral("apiKey"),
-                      m_apiKeyEdit->text().trimmed());
+                      m_api ? m_api->apiKey() : QString());
     settings.setValue(QStringLiteral("customerEmail"),
                       m_emailEdit->text().trimmed());
     settings.setValue(QStringLiteral("numKeys"), m_numKeysSpin->value());
@@ -411,10 +411,20 @@ void MainWindow::onApiKeyChanged(const QString &text)
 {
     if (m_api)
         m_api->setAPIKey(text);
-    updateControls();
 
-    if (text.trimmed().isEmpty())
-        statusBar()->showMessage(tr("Enter your LimeLM API key to get started."), 5000);
+    if (text.trimmed().isEmpty()) {
+        m_apiKeyLabel->setText(tr("API key: not configured"));
+        m_apiKeyLabel->setStyleSheet("color: gray;");
+        statusBar()->showMessage(tr("Enter your LimeLM API key via Settings."), 5000);
+    } else {
+        QString masked = text.trimmed();
+        if (masked.length() > 8)
+            masked = masked.left(4) + QString("*****") + masked.right(qMax(0, masked.length() - 9));
+        m_apiKeyLabel->setText(tr("API key: %1").arg(masked));
+        m_apiKeyLabel->setStyleSheet("color: green;");
+    }
+
+    updateControls();
 }
 
 void MainWindow::setBusy(bool busy, const QString &message)
@@ -427,7 +437,7 @@ void MainWindow::setBusy(bool busy, const QString &message)
 
 void MainWindow::updateControls()
 {
-    const bool hasKey = m_apiKeyEdit && !m_apiKeyEdit->text().trimmed().isEmpty();
+    const bool hasKey = m_api && m_api->hasAPIKey();
     const bool hasVersion = !currentVersionId().isEmpty();
     const bool idle = !m_busy;
 
@@ -891,8 +901,8 @@ void MainWindow::onSettings()
         QString key = dlg.apiKey();
         if (m_api) {
             m_api->setAPIKey(key);
-            m_apiKeyEdit->setText(key);
         }
+        onApiKeyChanged(key);
         updateControls();
         statusBar()->showMessage(tr("API key updated."), 5000);
     }
