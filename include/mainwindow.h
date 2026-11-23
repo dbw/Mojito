@@ -6,6 +6,7 @@
 #include <QVector>
 
 #include "webapi.h"
+#include "productkeydetaildialog.h"
 #include "preferencesdialog.h"
 
 class QCheckBox;
@@ -55,6 +56,8 @@ private slots:
     void onKeysGenerated(const QVector<ProductKey> &keys, const QString &error);
     void onCustomFieldsLoaded(const QVector<CustomField> &fields,
                              const QString &versionId, const QString &error);
+    void onProductKeyDetailsLoaded(const ProductKeyDetail &detail,
+                                   const QString &error);
 
 private:
     void buildUi();
@@ -117,6 +120,7 @@ private:
     QLabel *m_pageLabel = nullptr;
     QLabel *m_regStatusLabel = nullptr;
     QTableWidget *m_regTable = nullptr;
+    ProductKeyDetailDialog *m_detailDialog = nullptr;
 
     // Products tab
     QTreeWidget *m_productsTree = nullptr;

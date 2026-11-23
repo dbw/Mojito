@@ -69,6 +69,8 @@ MainWindow::MainWindow(WebAPI *api, QWidget *parent)
         connect(m_api, &WebAPI::keysGenerated, this, &MainWindow::onKeysGenerated);
         connect(m_api, &WebAPI::customFieldsLoaded, this,
                 &MainWindow::onCustomFieldsLoaded);
+        connect(m_api, &WebAPI::productKeyDetailsLoaded, this,
+                &MainWindow::onProductKeyDetailsLoaded);
     }
 
     restoreSettings();
@@ -336,6 +338,24 @@ void MainWindow::buildUi()
             &MainWindow::onSearchRegistrations);
     connect(m_refreshRegsButton, &QPushButton::clicked, this,
             &MainWindow::onRefreshRegistrations);
+
+    // Double-click on a registration to view full details
+    connect(m_regTable, &QTableWidget::cellDoubleClicked, this,
+            [this](int row, int) {
+                QTableWidgetItem *keyItem = m_regTable->item(row, ColumnKey);
+                if (!keyItem)
+                    return;
+                QString keyId = keyItem->toolTip();
+                if (keyId.startsWith(tr("Product key ID: ")))
+                    keyId = keyId.mid(tr("Product key ID: ").length());
+                if (keyId.isEmpty())
+                    return;
+
+                if (m_api && m_api->hasAPIKey()) {
+                    setBusy(true, tr("Loading key details..."));
+                    m_api->loadProductKeyDetails(keyId);
+                }
+            });
     connect(m_filterEmailEdit, &QLineEdit::returnPressed, this,
             &MainWindow::onSearchRegistrations);
     connect(m_prevPageButton, &QPushButton::clicked, this, [this]() {
@@ -845,6 +865,31 @@ void MainWindow::onCustomFieldsLoaded(const QVector<CustomField> &fields,
         statusBar()->showMessage(
             tr("Loaded %n custom field(s).", "", fields.size()), 3000);
     }
+}
+
+void MainWindow::onProductKeyDetailsLoaded(const ProductKeyDetail &detail,
+                                          const QString &error)
+{
+    setBusy(false);
+
+    if (!error.isEmpty()) {
+        showError(tr("Could not load key details"), error);
+        statusBar()->showMessage(tr("Loading key details failed."), 5000);
+        return;
+    }
+
+    if (detail.key.isEmpty()) {
+        statusBar()->showMessage(tr("No details available."), 5000);
+        return;
+    }
+
+    // Create the dialog if it doesn't exist yet
+    if (!m_detailDialog) {
+        m_detailDialog = new ProductKeyDetailDialog(this);
+    }
+
+    m_detailDialog->setDetail(detail);
+    m_detailDialog->exec();
 }
 
 void MainWindow::appendKeysToOutput(const QVector<ProductKey> &keys)

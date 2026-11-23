@@ -236,6 +236,20 @@ void WebAPI::loadCustomFields(const QString &versionId)
     reply->setProperty("versionId", versionId);
 }
 
+void WebAPI::loadProductKeyDetails(const QString &pkeyId)
+{
+    if (!hasAPIKey()) {
+        emit productKeyDetailsLoaded(ProductKeyDetail{}, tr("No LimeLM API key is configured."));
+        return;
+    }
+
+    QVector<QPair<QString, QString>> params;
+    params.append({QStringLiteral("pkey_id"), pkeyId});
+
+    post(QStringLiteral("limelm.pkey.getDetails"), params,
+         RequestType::ProductKeyDetails);
+}
+
 void WebAPI::handleReply(QNetworkReply *reply, RequestType type)
 {
     const QByteArray body = reply->readAll();
@@ -262,6 +276,9 @@ void WebAPI::handleReply(QNetworkReply *reply, RequestType type)
             break;
         case RequestType::CustomFields:
             emit customFieldsLoaded({}, versionId, error);
+            break;
+        case RequestType::ProductKeyDetails:
+            emit productKeyDetailsLoaded(ProductKeyDetail{}, error);
             break;
         }
     };
@@ -303,6 +320,10 @@ void WebAPI::handleReply(QNetworkReply *reply, RequestType type)
         }
         if (type == RequestType::CustomFields && code == QLatin1String("151")) {
             emit customFieldsLoaded({}, versionId, QString());
+            return;
+        }
+        if (type == RequestType::ProductKeyDetails && code == QLatin1String("1")) {
+            emit productKeyDetailsLoaded(ProductKeyDetail{}, tr("Product key not found."));
             return;
         }
 
@@ -391,6 +412,58 @@ void WebAPI::handleReply(QNetworkReply *reply, RequestType type)
                 fields.append(field);
         }
         emit customFieldsLoaded(fields, versionId, QString());
+        break;
+    }
+
+    case RequestType::ProductKeyDetails: {
+        ProductKeyDetail detail;
+        const QJsonObject pkeyObject = root.value(QStringLiteral("pkey")).toObject();
+
+        detail.key = jsonString(pkeyObject.value(QStringLiteral("key")));
+        detail.email = jsonString(pkeyObject.value(QStringLiteral("email")));
+        detail.activations = jsonInt(pkeyObject.value(QStringLiteral("acts")));
+        detail.activationsUsed = jsonInt(pkeyObject.value(QStringLiteral("acts_used")));
+        detail.revoked = jsonBool(pkeyObject.value(QStringLiteral("revoked")));
+        detail.created = jsonString(pkeyObject.value(QStringLiteral("created")));
+        detail.deactLimit = jsonString(pkeyObject.value(QStringLiteral("deact_limit")));
+        detail.forTfs = jsonBool(pkeyObject.value(QStringLiteral("for_tfs")));
+
+        // Parse features (custom license fields)
+        const QJsonObject featuresObject = pkeyObject.value(QStringLiteral("features")).toObject();
+        for (const QJsonValue &featureValue :
+             jsonArray(featuresObject.value(QStringLiteral("feature")))) {
+            const QJsonObject featureObject = featureValue.toObject();
+            QString name = jsonString(featureObject.value(QStringLiteral("name")));
+            QString value = jsonString(featureObject.value(QStringLiteral("value")));
+            if (!name.isEmpty())
+                detail.features.append(qMakePair(name, value));
+        }
+
+        // Parse activations
+        const QJsonObject activationsObject = pkeyObject.value(QStringLiteral("activations")).toObject();
+        for (const QJsonValue &actValue :
+             jsonArray(activationsObject.value(QStringLiteral("act")))) {
+            const QJsonObject actObject = actValue.toObject();
+            ProductKeyDetail::Activation act;
+            act.id = jsonString(actObject.value(QStringLiteral("id")));
+            act.ip = jsonString(actObject.value(QStringLiteral("ip")));
+            act.date = jsonString(actObject.value(QStringLiteral("date")));
+            act.type = jsonString(actObject.value(QStringLiteral("type")));
+            act.extraData = jsonString(actObject.value(QStringLiteral("extra_data")));
+            detail.activationsList.append(act);
+        }
+
+        // Parse tags
+        const QJsonObject tagsObject = pkeyObject.value(QStringLiteral("tags")).toObject();
+        for (const QJsonValue &tagValue :
+             jsonArray(tagsObject.value(QStringLiteral("tag")))) {
+            const QJsonObject tagObject = tagValue.toObject();
+            QString tagName = jsonString(tagObject.value(QStringLiteral("name")));
+            if (!tagName.isEmpty())
+                detail.tags.append(tagName);
+        }
+
+        emit productKeyDetailsLoaded(detail, QString());
         break;
     }
     }

@@ -34,9 +34,11 @@ add_executable(Mojito
     src/mainwindow.cpp
     src/webapi.cpp
     src/preferencesdialog.cpp
+    src/productkeydetaildialog.cpp
     include/mainwindow.h
     include/webapi.h
     include/preferencesdialog.h
+    include/productkeydetaildialog.h
     resources.qrc
     resources.rc
 )

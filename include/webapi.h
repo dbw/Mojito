@@ -49,6 +49,31 @@ struct CustomField
     QString defaultVal;
 };
 
+// Detailed information about a product key, including custom fields,
+// activations, and tags.
+struct ProductKeyDetail
+{
+    QString id;
+    QString key;
+    QString email;
+    int activations = 0;
+    int activationsUsed = 0;
+    bool revoked = false;
+    QString created;
+    QString deactLimit;
+    bool forTfs = false;
+    QVector<QPair<QString, QString>> features;  // name -> value
+    struct Activation {
+        QString id;
+        QString ip;
+        QString date;
+        QString type;
+        QString extraData;
+    };
+    QVector<Activation> activationsList;
+    QVector<QString> tags;
+};
+
 // Thin client for the LimeLM Web API (https://wyday.com/limelm/help/api/).
 // Every request is asynchronous; results are delivered through the signals
 // below. An empty error string means the request succeeded.
@@ -82,6 +107,9 @@ public:
     // limelm.feature.getAll - custom license fields for a version.
     void loadCustomFields(const QString &versionId);
 
+    // limelm.pkey.getDetails - full details for a single product key.
+    void loadProductKeyDetails(const QString &pkeyId);
+
 signals:
     void productsLoaded(const QVector<Product> &products, const QString &error);
 
@@ -93,12 +121,16 @@ signals:
     void customFieldsLoaded(const QVector<CustomField> &fields,
                            const QString &versionId, const QString &error);
 
+    void productKeyDetailsLoaded(const ProductKeyDetail &detail,
+                                 const QString &error);
+
 private:
     enum class RequestType {
         Products,
         Registrations,
         GenerateKeys,
-        CustomFields
+        CustomFields,
+        ProductKeyDetails
     };
 
     QNetworkReply *post(const QString &method,
