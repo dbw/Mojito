@@ -904,15 +904,22 @@ void MainWindow::onProductKeyDetailsLoaded(const ProductKeyDetail &detail,
         return;
     }
 
+    // Remember whether the dialog was already visible before this update
+    bool wasVisible = m_detailDialog && m_detailDialog->isVisible();
+
     // Create the dialog if it doesn't exist yet
     if (!m_detailDialog) {
         m_detailDialog = new ProductKeyDetailDialog(this);
     }
 
     m_detailDialog->setDetail(detail);
-    m_detailDialog->show();
-    m_detailDialog->raise();
-    m_detailDialog->activateWindow();
+
+    // Only show/raise/activate if the dialog was not already open
+    if (!wasVisible) {
+        m_detailDialog->show();
+        m_detailDialog->raise();
+        m_detailDialog->activateWindow();
+    }
 }
 
 void MainWindow::appendKeysToOutput(const QVector<ProductKey> &keys)
