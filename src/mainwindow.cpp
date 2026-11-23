@@ -98,18 +98,7 @@ void MainWindow::buildUi()
     auto *connectionForm = new QFormLayout(connectionGroup);
     connectionForm->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
 
-    // API key is managed via the Settings dialog (Help → Settings)
-    m_settingsButton = new QPushButton(tr("Settings..."), connectionGroup);
-    connect(m_settingsButton, &QPushButton::clicked, this,
-            &MainWindow::onSettings);
-
-    auto *settingsContainer = new QWidget(connectionGroup);
-    auto *settingsLayout = new QHBoxLayout(settingsContainer);
-    settingsLayout->setContentsMargins(0, 0, 0, 0);
-    settingsLayout->setSpacing(6);
-    settingsLayout->addWidget(m_settingsButton);
-    settingsLayout->addStretch(1);
-    connectionForm->addRow(tr("&Settings:"), settingsContainer);
+    // API key is managed via the Settings dialog (Help → Settings menu item)
 
     m_productCombo = new QComboBox(connectionGroup);
     m_productCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
