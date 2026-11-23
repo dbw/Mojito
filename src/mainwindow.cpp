@@ -356,6 +356,27 @@ void MainWindow::buildUi()
                     m_api->loadProductKeyDetails(keyId);
                 }
             });
+
+    // Track selection changes to update the detail dialog
+    connect(m_regTable, &QTableWidget::currentCellChanged, this,
+            [this](int currentRow, int, int, int) {
+                if (currentRow < 0)
+                    return;
+                QTableWidgetItem *keyItem = m_regTable->item(currentRow, ColumnKey);
+                if (!keyItem)
+                    return;
+                QString keyId = keyItem->toolTip();
+                if (keyId.startsWith(tr("Product key ID: ")))
+                    keyId = keyId.mid(tr("Product key ID: ").length());
+                if (keyId.isEmpty())
+                    return;
+
+                if (m_detailDialog && m_detailDialog->isVisible() &&
+                    m_api && m_api->hasAPIKey()) {
+                    setBusy(true, tr("Loading key details..."));
+                    m_api->loadProductKeyDetails(keyId);
+                }
+            });
     connect(m_filterEmailEdit, &QLineEdit::returnPressed, this,
             &MainWindow::onSearchRegistrations);
     connect(m_prevPageButton, &QPushButton::clicked, this, [this]() {
@@ -889,7 +910,9 @@ void MainWindow::onProductKeyDetailsLoaded(const ProductKeyDetail &detail,
     }
 
     m_detailDialog->setDetail(detail);
-    m_detailDialog->exec();
+    m_detailDialog->show();
+    m_detailDialog->raise();
+    m_detailDialog->activateWindow();
 }
 
 void MainWindow::appendKeysToOutput(const QVector<ProductKey> &keys)
