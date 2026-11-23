@@ -86,7 +86,6 @@ private:
     bool m_busy = false;
 
     // Connection area
-    QLabel *m_apiKeyLabel = nullptr;
     QPushButton *m_settingsButton = nullptr;
     QComboBox *m_productCombo = nullptr;
     QComboBox *m_versionCombo = nullptr;

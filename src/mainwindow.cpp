@@ -99,8 +99,6 @@ void MainWindow::buildUi()
     connectionForm->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
 
     // API key is managed via the Settings dialog (Help → Settings)
-    m_apiKeyLabel = new QLabel(tr("API key: not configured"), connectionGroup);
-    m_apiKeyLabel->setStyleSheet("color: gray;");
     m_settingsButton = new QPushButton(tr("Settings..."), connectionGroup);
     connect(m_settingsButton, &QPushButton::clicked, this,
             &MainWindow::onSettings);
@@ -109,8 +107,8 @@ void MainWindow::buildUi()
     auto *settingsLayout = new QHBoxLayout(settingsContainer);
     settingsLayout->setContentsMargins(0, 0, 0, 0);
     settingsLayout->setSpacing(6);
-    settingsLayout->addWidget(m_apiKeyLabel, 1);
     settingsLayout->addWidget(m_settingsButton);
+    settingsLayout->addStretch(1);
     connectionForm->addRow(tr("&Settings:"), settingsContainer);
 
     m_productCombo = new QComboBox(connectionGroup);
@@ -471,17 +469,8 @@ void MainWindow::onApiKeyChanged(const QString &text)
     if (m_api)
         m_api->setAPIKey(text);
 
-    if (text.trimmed().isEmpty()) {
-        m_apiKeyLabel->setText(tr("API key: not configured"));
-        m_apiKeyLabel->setStyleSheet("color: gray;");
+    if (text.trimmed().isEmpty())
         statusBar()->showMessage(tr("Enter your LimeLM API key via Settings."), 5000);
-    } else {
-        QString masked = text.trimmed();
-        if (masked.length() > 8)
-            masked = masked.left(4) + QString("*****") + masked.right(qMax(0, masked.length() - 9));
-        m_apiKeyLabel->setText(tr("API key: %1").arg(masked));
-        m_apiKeyLabel->setStyleSheet("color: green;");
-    }
 
     updateControls();
 }
