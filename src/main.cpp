@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName(QStringLiteral("Mojito"));
     QCoreApplication::setOrganizationDomain(QStringLiteral("mojito.local"));
     QCoreApplication::setApplicationName(QStringLiteral("LicenseCreator"));
-    QCoreApplication::setApplicationVersion(QStringLiteral("1.1.0"));
+    QCoreApplication::setApplicationVersion(QStringLiteral("1.0.0"));
 
     // Set application icon from bundled resource
     app.setWindowIcon(QIcon(QStringLiteral(":/images/Mojito Key Icon.png")));

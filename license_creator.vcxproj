@@ -138,7 +138,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <PostBuildEvent>
       <Message>Deploying Qt6 runtime next to license_creator.exe	Copying MSVC runtime DLLs next to license_creator.exe</Message>
       <Command>setlocal
-C:\Qt\6.11.2\msvc2022_64\bin\windeployqt.exe --debug --no-translations --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler --compiler-runtime G:/Projekte/Mojito/Debug/license_creator.exe
+C:\Qt\6.11.2\msvc2022_64\bin\windeployqt.exe --debug --no-translations --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler --no-compiler-runtime G:/Projekte/Mojito/Debug/license_creator.exe
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -225,7 +225,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <PostBuildEvent>
       <Message>Deploying Qt6 runtime next to license_creator.exe	Copying MSVC runtime DLLs next to license_creator.exe</Message>
       <Command>setlocal
-C:\Qt\6.11.2\msvc2022_64\bin\windeployqt.exe --release --no-translations --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler --compiler-runtime G:/Projekte/Mojito/Release/license_creator.exe
+C:\Qt\6.11.2\msvc2022_64\bin\windeployqt.exe --release --no-translations --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler --no-compiler-runtime G:/Projekte/Mojito/Release/license_creator.exe
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -312,7 +312,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <PostBuildEvent>
       <Message>Deploying Qt6 runtime next to license_creator.exe	Copying MSVC runtime DLLs next to license_creator.exe</Message>
       <Command>setlocal
-C:\Qt\6.11.2\msvc2022_64\bin\windeployqt.exe --release --no-translations --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler --compiler-runtime G:/Projekte/Mojito/MinSizeRel/license_creator.exe
+C:\Qt\6.11.2\msvc2022_64\bin\windeployqt.exe --release --no-translations --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler --no-compiler-runtime G:/Projekte/Mojito/MinSizeRel/license_creator.exe
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -398,7 +398,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <PostBuildEvent>
       <Message>Deploying Qt6 runtime next to license_creator.exe	Copying MSVC runtime DLLs next to license_creator.exe</Message>
       <Command>setlocal
-C:\Qt\6.11.2\msvc2022_64\bin\windeployqt.exe --release --no-translations --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler --compiler-runtime G:/Projekte/Mojito/RelWithDebInfo/license_creator.exe
+C:\Qt\6.11.2\msvc2022_64\bin\windeployqt.exe --release --no-translations --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler --no-compiler-runtime G:/Projekte/Mojito/RelWithDebInfo/license_creator.exe
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
