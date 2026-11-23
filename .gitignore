@@ -21,6 +21,8 @@ CPackSourceConfig.cmake
 .vs/
 license_creator.dir/
 license_creator_autogen/
+Mojito.dir/
+Mojito_autogen/
 x64/
 
 # Qt generated files
@@ -34,4 +36,9 @@ txt.txt
 *.log
 
 # Package files (will be regenerated)
-# license_creator_windows.zip
+*.zip
+*.exe
+*.sha256
+Mojito_windows.zip
+Mojito_installer.exe
+Mojito_windows.zip.sha256
