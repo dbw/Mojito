@@ -3,8 +3,8 @@
 
 #include <QObject>
 #include <QPair>
-#include <QString>
 #include <QMap>
+#include <QString>
 #include <QVector>
 
 class QNetworkAccessManager;
@@ -37,8 +37,19 @@ struct ProductKey
     bool revoked = false;
 };
 
+// A custom license field defined for a product version.
+struct CustomField
+{
+    QString id;
+    QString name;
+    QString type;        // "string", "int", "date_time", "checkbox"
+    bool required = false;
+    bool taReadable = true;
+    QString description;
+    QString defaultVal;
+};
+
 // Thin client for the LimeLM Web API (https://wyday.com/limelm/help/api/).
-//
 // Every request is asynchronous; results are delivered through the signals
 // below. An empty error string means the request succeeded.
 class WebAPI : public QObject
@@ -63,10 +74,13 @@ public:
                            const QString &emailFilter = QString());
 
     // limelm.pkey.generate - create new product keys.
-    // customFields: optional map of custom license field name → value.
+    // customFields: optional map of custom license field name -> value.
     void generateKeys(const QString &versionId, int numKeys, int numActs,
                       const QString &email,
                       const QMap<QString, QString> &customFields = {});
+
+    // limelm.feature.getAll - custom license fields for a version.
+    void loadCustomFields(const QString &versionId);
 
 signals:
     void productsLoaded(const QVector<Product> &products, const QString &error);
@@ -76,11 +90,15 @@ signals:
 
     void keysGenerated(const QVector<ProductKey> &keys, const QString &error);
 
+    void customFieldsLoaded(const QVector<CustomField> &fields,
+                           const QString &versionId, const QString &error);
+
 private:
     enum class RequestType {
         Products,
         Registrations,
-        GenerateKeys
+        GenerateKeys,
+        CustomFields
     };
 
     QNetworkReply *post(const QString &method,

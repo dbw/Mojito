@@ -53,6 +53,8 @@ private slots:
     void onRegistrationsLoaded(const QVector<ProductKey> &keys, int page,
                                int totalPages, int total, const QString &error);
     void onKeysGenerated(const QVector<ProductKey> &keys, const QString &error);
+    void onCustomFieldsLoaded(const QVector<CustomField> &fields,
+                             const QString &versionId, const QString &error);
 
 private:
     void buildUi();

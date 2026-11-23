@@ -220,6 +220,22 @@ void WebAPI::generateKeys(const QString &versionId, int numKeys, int numActs,
          RequestType::GenerateKeys);
 }
 
+void WebAPI::loadCustomFields(const QString &versionId)
+{
+    if (!hasAPIKey()) {
+        emit customFieldsLoaded({}, versionId,
+                               tr("No LimeLM API key is configured."));
+        return;
+    }
+
+    QVector<QPair<QString, QString>> params;
+    params.append({QStringLiteral("version_id"), versionId});
+
+    QNetworkReply *reply = post(QStringLiteral("limelm.feature.getAll"), params,
+                                RequestType::CustomFields);
+    reply->setProperty("versionId", versionId);
+}
+
 void WebAPI::handleReply(QNetworkReply *reply, RequestType type)
 {
     const QByteArray body = reply->readAll();
@@ -228,11 +244,12 @@ void WebAPI::handleReply(QNetworkReply *reply, RequestType type)
     const int httpStatus =
         reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     const int page = qMax(1, reply->property("page").toInt());
+    const QString versionId = reply->property("versionId").toString();
 
     reply->deleteLater();
 
     // Sends the failure to the signal that belongs to this request type.
-    auto fail = [this, type, page](const QString &error) {
+    auto fail = [this, type, page, versionId](const QString &error) {
         switch (type) {
         case RequestType::Products:
             emit productsLoaded({}, error);
@@ -242,6 +259,9 @@ void WebAPI::handleReply(QNetworkReply *reply, RequestType type)
             break;
         case RequestType::GenerateKeys:
             emit keysGenerated({}, error);
+            break;
+        case RequestType::CustomFields:
+            emit customFieldsLoaded({}, versionId, error);
             break;
         }
     };
@@ -279,6 +299,10 @@ void WebAPI::handleReply(QNetworkReply *reply, RequestType type)
         }
         if (type == RequestType::Registrations && code == QLatin1String("1")) {
             emit registrationsLoaded({}, page, 0, 0, QString());
+            return;
+        }
+        if (type == RequestType::CustomFields && code == QLatin1String("151")) {
+            emit customFieldsLoaded({}, versionId, QString());
             return;
         }
 
@@ -339,6 +363,34 @@ void WebAPI::handleReply(QNetworkReply *reply, RequestType type)
         const QJsonObject pkeysObject =
             root.value(QStringLiteral("pkeys")).toObject();
         emit keysGenerated(parseProductKeys(pkeysObject), QString());
+        break;
+    }
+
+    case RequestType::CustomFields: {
+        QVector<CustomField> fields;
+        // The response is <fields><field .../></fields>
+        QJsonObject fieldsObject = root.value(QStringLiteral("fields")).toObject();
+        // LimeLM might return fields as an array directly
+        if (fieldsObject.isEmpty() && root.contains(QStringLiteral("field"))) {
+            fieldsObject = root;
+        }
+        for (const QJsonValue &fieldValue :
+             jsonArray(fieldsObject.value(QStringLiteral("field")))) {
+            const QJsonObject fieldObject = fieldValue.toObject();
+            CustomField field;
+            field.id = jsonString(fieldObject.value(QStringLiteral("id")));
+            field.name = jsonString(fieldObject.value(QStringLiteral("name")));
+            field.type = jsonString(fieldObject.value(QStringLiteral("type")));
+            field.required = jsonBool(fieldObject.value(QStringLiteral("required")));
+            field.taReadable = jsonBool(fieldObject.value(QStringLiteral("ta_readable")));
+            field.description = jsonString(fieldObject.value(QStringLiteral("description")));
+            field.defaultVal = jsonString(fieldObject.value(QStringLiteral("default_val")));
+            if (field.type.isEmpty())
+                field.type = QStringLiteral("string");
+            if (!field.name.isEmpty())
+                fields.append(field);
+        }
+        emit customFieldsLoaded(fields, versionId, QString());
         break;
     }
     }

@@ -65,6 +65,8 @@ MainWindow::MainWindow(WebAPI *api, QWidget *parent)
         connect(m_api, &WebAPI::registrationsLoaded, this,
                 &MainWindow::onRegistrationsLoaded);
         connect(m_api, &WebAPI::keysGenerated, this, &MainWindow::onKeysGenerated);
+        connect(m_api, &WebAPI::customFieldsLoaded, this,
+                &MainWindow::onCustomFieldsLoaded);
     }
 
     restoreSettings();
@@ -298,7 +300,15 @@ void MainWindow::buildUi()
     connect(m_productCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &MainWindow::onProductChanged);
     connect(m_versionCombo, &QComboBox::currentTextChanged, this,
-            [this](const QString &) { updateControls(); });
+            [this](const QString &) {
+                updateControls();
+                // Load custom fields when version changes
+                if (m_api && m_api->hasAPIKey()) {
+                    QString versionId = currentVersionId();
+                    if (!versionId.isEmpty())
+                        m_api->loadCustomFields(versionId);
+                }
+            });
 
     connect(m_addCustomFieldButton, &QPushButton::clicked, this, [this]() {
         int row = m_customFieldsTable->rowCount();
@@ -693,6 +703,13 @@ void MainWindow::onProductChanged(int index)
     // NEW: Populate existing licenses for the selected product version
     onRefreshRegistrations();
 
+    // Load custom license fields for the selected version
+    if (m_api && m_api->hasAPIKey()) {
+        QString versionId = currentVersionId();
+        if (!versionId.isEmpty())
+            m_api->loadCustomFields(versionId);
+    }
+
     updateControls();
 }
 
@@ -723,8 +740,14 @@ void MainWindow::onGenerate()
         QTableWidgetItem *nameItem = m_customFieldsTable->item(row, 0);
         QTableWidgetItem *valueItem = m_customFieldsTable->item(row, 1);
         if (nameItem && !nameItem->text().trimmed().isEmpty()) {
-            customFields.insert(nameItem->text().trimmed(),
-                               valueItem ? valueItem->text() : QString());
+            QString value;
+            if (valueItem) {
+                if (valueItem->checkState() != Qt::Unchecked && valueItem->flags() & Qt::ItemIsUserCheckable)
+                    value = (valueItem->checkState() == Qt::Checked) ? QStringLiteral("true") : QStringLiteral("false");
+                else
+                    value = valueItem->text();
+            }
+            customFields.insert(nameItem->text().trimmed(), value);
         }
     }
 
@@ -756,6 +779,48 @@ void MainWindow::onKeysGenerated(const QVector<ProductKey> &keys,
     appendKeysToOutput(keys);
     updateControls();
     statusBar()->showMessage(tr("Generated %n key(s).", "", keys.size()), 8000);
+}
+
+void MainWindow::onCustomFieldsLoaded(const QVector<CustomField> &fields,
+                                      const QString &versionId,
+                                      const QString &error)
+{
+    if (!error.isEmpty()) {
+        statusBar()->showMessage(tr("Could not load custom fields: %1").arg(error), 5000);
+        return;
+    }
+
+    // Only update if this is for the currently selected version
+    if (versionId != currentVersionId())
+        return;
+
+    // Clear existing rows
+    m_customFieldsTable->setRowCount(0);
+
+    // Populate with fields from the version
+    for (const CustomField &field : fields) {
+        int row = m_customFieldsTable->rowCount();
+        m_customFieldsTable->insertRow(row);
+
+        auto *nameItem = new QTableWidgetItem(field.name);
+        nameItem->setFlags(nameItem->flags() & ~Qt::ItemIsEditable);
+        nameItem->setToolTip(tr("Type: %1%2")
+                                 .arg(field.type)
+                                 .arg(field.required ? tr(" (required)") : QString()));
+        m_customFieldsTable->setItem(row, 0, nameItem);
+
+        auto *valueItem = new QTableWidgetItem(field.defaultVal);
+        if (field.type == QLatin1String("checkbox"))
+            valueItem->setCheckState(field.defaultVal == QLatin1String("true")
+                                         ? Qt::Checked
+                                         : Qt::Unchecked);
+        m_customFieldsTable->setItem(row, 1, valueItem);
+    }
+
+    if (!fields.isEmpty()) {
+        statusBar()->showMessage(
+            tr("Loaded %n custom field(s).", "", fields.size()), 3000);
+    }
 }
 
 void MainWindow::appendKeysToOutput(const QVector<ProductKey> &keys)
