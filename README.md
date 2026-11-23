@@ -1,4 +1,6 @@
-# License Creator
+# Mojito
+
+*A Desktop Manager for LimeLM*
 
 ![Mojito Header](images/mojito_cocktail_icon_transparent_trimmed.png)
 
