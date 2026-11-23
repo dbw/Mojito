@@ -29,6 +29,8 @@
 #include <QRegularExpression>
 #include <QSettings>
 #include <QSpinBox>
+#include <QDateTimeEdit>
+#include <QCheckBox>
 #include <QStatusBar>
 #include <QStringList>
 #include <QSet>
@@ -300,9 +302,16 @@ void MainWindow::buildUi()
     connect(m_addCustomFieldButton, &QPushButton::clicked, this, [this]() {
         int row = m_customFieldsTable->rowCount();
         m_customFieldsTable->insertRow(row);
-        m_customFieldsTable->setItem(row, 0, new QTableWidgetItem());
-        m_customFieldsTable->setItem(row, 1, new QTableWidgetItem());
-        m_customFieldsTable->editItem(m_customFieldsTable->item(row, 0));
+
+        auto *nameItem = new QTableWidgetItem(tr("field_name"));
+        nameItem->setData(Qt::UserRole, QStringLiteral("string"));
+        m_customFieldsTable->setItem(row, 0, nameItem);
+
+        auto *lineEdit = new QLineEdit(m_customFieldsTable);
+        lineEdit->setPlaceholderText(tr("value"));
+        m_customFieldsTable->setCellWidget(row, 1, lineEdit);
+
+        m_customFieldsTable->editItem(nameItem);
     });
     connect(m_removeCustomFieldButton, &QPushButton::clicked, this, [this]() {
         QList<QTableWidgetItem *> selected = m_customFieldsTable->selectedItems();
@@ -716,16 +725,28 @@ void MainWindow::onGenerate()
     QMap<QString, QString> customFields;
     for (int row = 0; row < m_customFieldsTable->rowCount(); ++row) {
         QTableWidgetItem *nameItem = m_customFieldsTable->item(row, 0);
-        QTableWidgetItem *valueItem = m_customFieldsTable->item(row, 1);
         if (nameItem && !nameItem->text().trimmed().isEmpty()) {
+            QString fieldName = nameItem->text().trimmed();
+            QString fieldType = nameItem->data(Qt::UserRole).toString();
             QString value;
-            if (valueItem) {
-                if (valueItem->checkState() != Qt::Unchecked && valueItem->flags() & Qt::ItemIsUserCheckable)
-                    value = (valueItem->checkState() == Qt::Checked) ? QStringLiteral("true") : QStringLiteral("false");
-                else
-                    value = valueItem->text();
+
+            QWidget *widget = m_customFieldsTable->cellWidget(row, 1);
+            if (fieldType == QLatin1String("checkbox")) {
+                QCheckBox *cb = qobject_cast<QCheckBox *>(widget);
+                value = (cb && cb->isChecked()) ? QStringLiteral("1") : QStringLiteral("0");
+            } else if (fieldType == QLatin1String("int")) {
+                QSpinBox *sb = qobject_cast<QSpinBox *>(widget);
+                value = sb ? QString::number(sb->value()) : QString();
+            } else if (fieldType == QLatin1String("date_time")) {
+                QDateTimeEdit *dte = qobject_cast<QDateTimeEdit *>(widget);
+                value = dte ? dte->dateTime().toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
+                            : QString();
+            } else {
+                QLineEdit *le = qobject_cast<QLineEdit *>(widget);
+                value = le ? le->text() : QString();
             }
-            customFields.insert(nameItem->text().trimmed(), value);
+
+            customFields.insert(fieldName, value);
         }
     }
 
@@ -787,12 +808,37 @@ void MainWindow::onCustomFieldsLoaded(const QVector<CustomField> &fields,
                                  .arg(field.required ? tr(" (required)") : QString()));
         m_customFieldsTable->setItem(row, 0, nameItem);
 
-        auto *valueItem = new QTableWidgetItem(field.defaultVal);
-        if (field.type == QLatin1String("checkbox"))
-            valueItem->setCheckState(field.defaultVal == QLatin1String("true")
-                                         ? Qt::Checked
-                                         : Qt::Unchecked);
-        m_customFieldsTable->setItem(row, 1, valueItem);
+        // Create an appropriate widget based on the field type
+        if (field.type == QLatin1String("checkbox")) {
+            auto *checkBox = new QCheckBox(m_customFieldsTable);
+            checkBox->setChecked(field.defaultVal == QLatin1String("true")
+                                 || field.defaultVal == QLatin1String("1"));
+            m_customFieldsTable->setCellWidget(row, 1, checkBox);
+        } else if (field.type == QLatin1String("int")) {
+            auto *spinBox = new QSpinBox(m_customFieldsTable);
+            spinBox->setRange(INT_MIN, INT_MAX);
+            spinBox->setValue(field.defaultVal.toInt());
+            m_customFieldsTable->setCellWidget(row, 1, spinBox);
+        } else if (field.type == QLatin1String("date_time")) {
+            auto *dateTimeEdit = new QDateTimeEdit(m_customFieldsTable);
+            dateTimeEdit->setDisplayFormat(QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+            dateTimeEdit->setCalendarPopup(true);
+            if (!field.defaultVal.isEmpty()) {
+                QDateTime dt = QDateTime::fromString(field.defaultVal,
+                                                     QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+                if (dt.isValid())
+                    dateTimeEdit->setDateTime(dt);
+            }
+            m_customFieldsTable->setCellWidget(row, 1, dateTimeEdit);
+        } else {
+            // Default: string
+            auto *lineEdit = new QLineEdit(m_customFieldsTable);
+            lineEdit->setText(field.defaultVal);
+            m_customFieldsTable->setCellWidget(row, 1, lineEdit);
+        }
+
+        // Store the field type in the name item's user data for later retrieval
+        nameItem->setData(Qt::UserRole, field.type);
     }
 
     if (!fields.isEmpty()) {
