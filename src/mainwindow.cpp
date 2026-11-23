@@ -25,6 +25,7 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QPlainTextEdit>
+#include <QTextBrowser>
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QSettings>
@@ -1079,6 +1080,11 @@ void MainWindow::populateRegistrations(const QVector<ProductKey> &keys)
 
 void MainWindow::onOpenUserGuide()
 {
+    showUserGuide();
+}
+
+void MainWindow::showUserGuide()
+{
     const QString applicationDir = QCoreApplication::applicationDirPath();
     const QStringList candidates = {
         applicationDir + QStringLiteral("/USER_GUIDE.md"),
@@ -1087,18 +1093,61 @@ void MainWindow::onOpenUserGuide()
         QStringLiteral("USER_GUIDE.md"),
     };
 
+    QString guidePath;
     for (const QString &candidate : candidates) {
         const QFileInfo info(candidate);
         if (info.exists()) {
-            QDesktopServices::openUrl(QUrl::fromLocalFile(info.absoluteFilePath()));
-            return;
+            guidePath = info.absoluteFilePath();
+            break;
         }
     }
 
-    QMessageBox::information(
-        this, tr("User guide"),
-        tr("The user guide (USER_GUIDE.md) was not found next to the "
-           "application.\n\nExpected location:\n%1").arg(applicationDir));
+    if (guidePath.isEmpty()) {
+        QMessageBox::information(
+            this, tr("User guide"),
+            tr("The user guide (USER_GUIDE.md) was not found next to the "
+               "application.\n\nExpected location:\n%1").arg(applicationDir));
+        return;
+    }
+
+    // Read the markdown file
+    QFile file(guidePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, tr("User guide"),
+                             tr("Could not read the user guide file:\n%1")
+                                 .arg(file.errorString()));
+        return;
+    }
+    const QString markdown = QString::fromUtf8(file.readAll());
+    file.close();
+
+    // Create or reuse the user guide window
+    static QWidget *guideWindow = nullptr;
+    if (!guideWindow) {
+        guideWindow = new QWidget(nullptr, Qt::Window);
+        guideWindow->setAttribute(Qt::WA_DeleteOnClose, false);
+        guideWindow->setWindowTitle(tr("Mojito - User Guide"));
+        guideWindow->setMinimumSize(600, 400);
+        guideWindow->resize(800, 600);
+
+        auto *layout = new QVBoxLayout(guideWindow);
+        layout->setContentsMargins(0, 0, 0, 0);
+
+        auto *textBrowser = new QTextBrowser(guideWindow);
+        textBrowser->setOpenExternalLinks(true);
+        textBrowser->setMarkdown(markdown);
+        layout->addWidget(textBrowser);
+
+        guideWindow->show();
+    } else {
+        // Update content and show
+        auto *textBrowser = guideWindow->findChild<QTextBrowser *>();
+        if (textBrowser)
+            textBrowser->setMarkdown(markdown);
+        guideWindow->show();
+        guideWindow->raise();
+        guideWindow->activateWindow();
+    }
 }
 
 void MainWindow::onAbout()

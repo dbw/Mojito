@@ -47,6 +47,7 @@ private slots:
     void onSearchRegistrations();
     void onRefreshRegistrations();
     void onOpenUserGuide();
+    void showUserGuide();
     void onAbout();
 
     // WebAPI results
