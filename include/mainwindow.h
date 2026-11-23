@@ -102,6 +102,11 @@ private:
     QPushButton *m_copyKeysButton = nullptr;
     QPushButton *m_saveKeysButton = nullptr;
 
+    // Custom license fields
+    QTableWidget *m_customFieldsTable = nullptr;
+    QPushButton *m_addCustomFieldButton = nullptr;
+    QPushButton *m_removeCustomFieldButton = nullptr;
+
     // Registrations tab
     QCheckBox *m_filterByVersionCheck = nullptr;
     QLineEdit *m_filterEmailEdit = nullptr;

@@ -49,6 +49,15 @@ target_link_libraries(license_creator PRIVATE
     Qt6::Network
 )
 
+# Copy USER_GUIDE.md to the build directory so the app can find it during development
+add_custom_command(TARGET license_creator POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_CURRENT_SOURCE_DIR}/USER_GUIDE.md"
+            "$<TARGET_FILE_DIR:license_creator>/USER_GUIDE.md"
+    COMMENT "Copying USER_GUIDE.md to build directory"
+    VERBATIM
+)
+
 # Add include directories for headers in include/
 target_include_directories(license_creator PRIVATE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

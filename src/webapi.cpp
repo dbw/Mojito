@@ -193,7 +193,8 @@ void WebAPI::loadRegistrations(int page, int perPage, const QString &versionId,
 }
 
 void WebAPI::generateKeys(const QString &versionId, int numKeys, int numActs,
-                          const QString &email)
+                          const QString &email,
+                          const QMap<QString, QString> &customFields)
 {
     if (!hasAPIKey()) {
         emit keysGenerated({}, tr("No LimeLM API key is configured."));
@@ -206,6 +207,14 @@ void WebAPI::generateKeys(const QString &versionId, int numKeys, int numActs,
     params.append({QStringLiteral("num_acts"), QString::number(qMax(1, numActs))});
     if (!email.trimmed().isEmpty())
         params.append({QStringLiteral("email"), email.trimmed()});
+
+    // Add custom license fields (feature_name[] / feature_value[])
+    for (auto it = customFields.constBegin(); it != customFields.constEnd(); ++it) {
+        if (!it.key().trimmed().isEmpty()) {
+            params.append({QStringLiteral("feature_name[]"), it.key().trimmed()});
+            params.append({QStringLiteral("feature_value[]"), it.value()});
+        }
+    }
 
     post(QStringLiteral("limelm.pkey.generate"), params,
          RequestType::GenerateKeys);

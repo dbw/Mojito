@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QPair>
 #include <QString>
+#include <QMap>
 #include <QVector>
 
 class QNetworkAccessManager;
@@ -62,8 +63,10 @@ public:
                            const QString &emailFilter = QString());
 
     // limelm.pkey.generate - create new product keys.
+    // customFields: optional map of custom license field name → value.
     void generateKeys(const QString &versionId, int numKeys, int numActs,
-                      const QString &email);
+                      const QString &email,
+                      const QMap<QString, QString> &customFields = {});
 
 signals:
     void productsLoaded(const QVector<Product> &products, const QString &error);

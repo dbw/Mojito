@@ -2,6 +2,7 @@
 
 #include <QAction>
 #include <QApplication>
+#include <algorithm>
 #include <QCheckBox>
 #include <QClipboard>
 #include <QCloseEvent>
@@ -19,6 +20,7 @@
 #include <QHeaderView>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMap>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -29,6 +31,7 @@
 #include <QSpinBox>
 #include <QStatusBar>
 #include <QStringList>
+#include <QSet>
 #include <QTableWidget>
 #include <QTabWidget>
 #include <QTextStream>
@@ -162,6 +165,33 @@ void MainWindow::buildUi()
 
     generateLayout->addLayout(generateForm);
 
+    // --- Custom license fields ---
+    auto *customFieldsGroup = new QGroupBox(tr("Custom license fields (optional)"), generateTab);
+    auto *customFieldsLayout = new QVBoxLayout(customFieldsGroup);
+    customFieldsLayout->setContentsMargins(8, 8, 8, 8);
+
+    m_customFieldsTable = new QTableWidget(0, 2, customFieldsGroup);
+    m_customFieldsTable->setHorizontalHeaderLabels({tr("Field name"), tr("Value")});
+    m_customFieldsTable->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
+    m_customFieldsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    m_customFieldsTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    m_customFieldsTable->setAlternatingRowColors(true);
+    m_customFieldsTable->verticalHeader()->setVisible(false);
+    m_customFieldsTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    m_customFieldsTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    m_customFieldsTable->setMinimumHeight(120);
+    customFieldsLayout->addWidget(m_customFieldsTable, 1);
+
+    auto *customButtons = new QHBoxLayout();
+    m_addCustomFieldButton = new QPushButton(tr("Add field"), customFieldsGroup);
+    m_removeCustomFieldButton = new QPushButton(tr("Remove selected"), customFieldsGroup);
+    customButtons->addWidget(m_addCustomFieldButton);
+    customButtons->addWidget(m_removeCustomFieldButton);
+    customButtons->addStretch(1);
+    customFieldsLayout->addLayout(customButtons);
+
+    generateLayout->addWidget(customFieldsGroup);
+
     auto *generateButtons = new QHBoxLayout();
     m_generateButton = new QPushButton(tr("Generate keys"), generateTab);
     m_generateButton->setDefault(true);
@@ -269,6 +299,25 @@ void MainWindow::buildUi()
             this, &MainWindow::onProductChanged);
     connect(m_versionCombo, &QComboBox::currentTextChanged, this,
             [this](const QString &) { updateControls(); });
+
+    connect(m_addCustomFieldButton, &QPushButton::clicked, this, [this]() {
+        int row = m_customFieldsTable->rowCount();
+        m_customFieldsTable->insertRow(row);
+        m_customFieldsTable->setItem(row, 0, new QTableWidgetItem());
+        m_customFieldsTable->setItem(row, 1, new QTableWidgetItem());
+        m_customFieldsTable->editItem(m_customFieldsTable->item(row, 0));
+    });
+    connect(m_removeCustomFieldButton, &QPushButton::clicked, this, [this]() {
+        QList<QTableWidgetItem *> selected = m_customFieldsTable->selectedItems();
+        QSet<int> rows;
+        for (QTableWidgetItem *item : selected)
+            rows.insert(item->row());
+        // Remove from bottom to top to keep indices valid
+        QList<int> sortedRows = rows.values();
+        std::sort(sortedRows.begin(), sortedRows.end(), std::greater<int>());
+        for (int row : sortedRows)
+            m_customFieldsTable->removeRow(row);
+    });
 
     connect(m_generateButton, &QPushButton::clicked, this,
             &MainWindow::onGenerate);
@@ -668,11 +717,22 @@ void MainWindow::onGenerate()
         return;
     }
 
+    // Collect custom license fields from the table
+    QMap<QString, QString> customFields;
+    for (int row = 0; row < m_customFieldsTable->rowCount(); ++row) {
+        QTableWidgetItem *nameItem = m_customFieldsTable->item(row, 0);
+        QTableWidgetItem *valueItem = m_customFieldsTable->item(row, 1);
+        if (nameItem && !nameItem->text().trimmed().isEmpty()) {
+            customFields.insert(nameItem->text().trimmed(),
+                               valueItem ? valueItem->text() : QString());
+        }
+    }
+
     const int keyCount = m_numKeysSpin->value();
     setBusy(true, tr("Generating %n key(s)...", "", keyCount));
 
     m_api->generateKeys(versionId, keyCount, m_numActsSpin->value(),
-                        m_emailEdit->text().trimmed());
+                        m_emailEdit->text().trimmed(), customFields);
 }
 
 void MainWindow::onKeysGenerated(const QVector<ProductKey> &keys,
@@ -859,6 +919,8 @@ void MainWindow::onOpenUserGuide()
     const QStringList candidates = {
         applicationDir + QStringLiteral("/USER_GUIDE.md"),
         applicationDir + QStringLiteral("/../USER_GUIDE.md"),
+        applicationDir + QStringLiteral("/../../USER_GUIDE.md"),
+        QStringLiteral("USER_GUIDE.md"),
     };
 
     for (const QString &candidate : candidates) {
