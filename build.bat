@@ -42,7 +42,14 @@ echo Configuring CMake...
 :: Change to build directory and run cmake from there
 pushd build >NUL
 
-cmake .. -G "Visual Studio 17 2022" -A x64
+:: Use VS-bundled cmake if not in PATH
+set "CMAKE_EXE=cmake"
+where cmake >nul 2>&1
+if errorlevel 1 (
+    set "CMAKE_EXE=C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"
+)
+
+"%CMAKE_EXE%" .. -G "Visual Studio 17 2022" -A x64
 
 if errorlevel 1 (
     echo.
@@ -59,7 +66,7 @@ echo.
 echo Building project...
 
 :: Build in Release mode
-cmake --build . --config Release --parallel
+"%CMAKE_EXE%" --build . --config Release --parallel
 
 if errorlevel 1 (
     echo.

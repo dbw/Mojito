@@ -1,6 +1,6 @@
 @echo off
 ::============================================================================
-:: License Creator - Deploy Script
+:: Mojito - Deploy Script
 ::============================================================================
 :: Builds a portable ZIP package with CPack. The package contains the
 :: executable, every required Qt6 runtime DLL, the Windows platform plugin
@@ -28,7 +28,7 @@ if "%INSTALLER_TYPE%"=="" set "INSTALLER_TYPE=ZIP"
 set "ZIP_NAME=Mojito_windows.zip"
 set "PACKAGE_DIR=%BUILD_DIR%\package"
 set "ZIP_PATH=%PACKAGE_DIR%\%ZIP_NAME%"
-set "NSIS_NAME=Mojito_installer.exe"
+set "NSIS_NAME=Mojito_windows.exe"
 set "NSIS_PATH=%PACKAGE_DIR%\%NSIS_NAME%"
 
 echo.
@@ -57,7 +57,15 @@ echo [1/3] Building %CONFIG% ...
 echo.
 
 pushd "%BUILD_DIR%"
-cmake --build . --config %CONFIG% --parallel
+
+:: Use VS-bundled cmake if not in PATH
+set "CMAKE_EXE=cmake"
+where cmake >nul 2>&1
+if errorlevel 1 (
+    set "CMAKE_EXE=C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"
+)
+
+"%CMAKE_EXE%" --build . --config %CONFIG% --parallel
 if errorlevel 1 (
     popd
     echo.
@@ -73,10 +81,16 @@ echo.
 echo [2/3] Running CPack (ZIP, Qt6 runtime deployment) ...
 echo.
 
+set "CPACK_EXE=cpack"
+where cpack >nul 2>&1
+if errorlevel 1 (
+    set "CPACK_EXE=C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cpack.exe"
+)
+
 if /I "%INSTALLER_TYPE%"=="NSIS" (
-    cpack -G NSIS -C %CONFIG% --config CPackConfig.cmake
+    "%CPACK_EXE%" -G NSIS -C %CONFIG% --config CPackConfig.cmake
 ) else (
-    cpack -G ZIP -C %CONFIG% --config CPackConfig.cmake
+    "%CPACK_EXE%" -G ZIP -C %CONFIG% --config CPackConfig.cmake
 )
 if errorlevel 1 (
     popd
@@ -112,6 +126,11 @@ if /I "%INSTALLER_TYPE%"=="NSIS" (
 echo.
 echo [3/3] Verifying bundled Qt6 dependencies ...
 echo.
+
+if /I "%INSTALLER_TYPE%"=="NSIS" (
+    echo Skipping archive verification for NSIS installer.
+    goto :copied
+)
 
 set "ZIP_LIST=%TEMP%\Mojito_zip_contents.txt"
 tar -tf "%ZIP_PATH%" > "%ZIP_LIST%" 2>nul
@@ -168,21 +187,22 @@ echo.
 echo ============================================================================
 echo Deploy completed successfully!
 echo.
-if /I "%INSTALLER_TYPE%"=="NSIS" (
-    echo Installer: %PROJECT_ROOT%\%NSIS_NAME%
-    echo.
-    echo Run the installer to install Mojito on your system.
-    echo The installer includes Mojito.exe, Qt6 DLLs, plugins\platforms\qwindows.dll,
-    echo MSVC runtime, README.md, LICENSE.txt
-) else (
-    echo ZIP archive: %PROJECT_ROOT%\%ZIP_NAME%
-    echo.
-    echo Contents: Mojito.exe, Qt6 DLLs, plugins\platforms\qwindows.dll,
-    echo           MSVC runtime, README.md, LICENSE.txt
-    echo.
-    echo Extract the archive anywhere and start Mojito.exe - no
-    echo installation and no Qt/Visual C++ runtime required (Windows 10+).
-)
+if /I "%INSTALLER_TYPE%"=="NSIS" goto :nsis_msg
+echo ZIP archive: %PROJECT_ROOT%\%ZIP_NAME%
+echo.
+echo Contents: Mojito.exe, Qt6 DLLs, plugins\platforms\qwindows.dll,
+echo           MSVC runtime, README.md, LICENSE.txt
+echo.
+echo Extract the archive anywhere and start Mojito.exe - no
+echo installation and no Qt/Visual C++ runtime required (Windows 10+).
+goto :deploy_end
+:nsis_msg
+echo Installer: %PROJECT_ROOT%\%NSIS_NAME%
+echo.
+echo Run the installer to install Mojito on your system.
+echo The installer includes Mojito.exe, Qt6 DLLs, plugins\platforms\qwindows.dll,
+echo MSVC runtime, README.md, LICENSE.txt
+:deploy_end
 echo ============================================================================
 echo.
 
