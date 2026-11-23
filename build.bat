@@ -15,7 +15,7 @@
 
 echo.
 echo ============================================================================
-echo License Creator - Build Script
+echo Mojito - Build Script
 echo ============================================================================
 
 :: Verify Qt path exists
@@ -76,7 +76,7 @@ echo.
 echo ============================================================================
 echo Build finished.
 echo.
-echo Executable:  build\Release\license_creator.exe
+echo Executable:  build\Release\Mojito.exe
 echo              (Qt6 DLLs are already deployed next to it by windeployqt,
 echo               so it can be started directly from the build folder)
 echo ============================================================================

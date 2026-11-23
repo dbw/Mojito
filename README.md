@@ -14,7 +14,7 @@ LimeLM WebAPI.
 - Fully resizable, single-window UI with tabs
 - Portable ZIP package via CPack - no Qt or Visual C++ runtime installation
   required
-- Settings stored in `license_creator.ini` next to the executable
+- Settings stored in `Mojito.ini` next to the executable
 
 ## Prerequisites
 
@@ -49,7 +49,7 @@ build.bat
 The script configures CMake (Visual Studio 17 2022, x64) and builds the
 `Release` configuration. After the build, `windeployqt` automatically copies the
 required Qt6 DLLs and plugins next to the executable, so
-`build\Release\license_creator.exe` can be started directly.
+`build\Release\Mojito.exe` can be started directly.
 
 Manual equivalent:
 
@@ -69,14 +69,14 @@ deploy.bat
 
 It rebuilds `Release`, runs CPack and writes:
 
-- `build\package\license_creator_windows.zip` (+ `.sha256` checksum)
-- a copy at `license_creator_windows.zip` in the project root
+- `build\package\Mojito_windows.zip` (+ `.sha256` checksum)
+- a copy at `Mojito_windows.zip` in the project root
 
 The ZIP is self-contained and portable:
 
 ```
-license_creator_windows\
-    license_creator.exe
+Mojito_windows\
+    Mojito.exe
     Qt6Core.dll, Qt6Gui.dll, Qt6Widgets.dll, Qt6Network.dll, Qt6Svg.dll
     msvcp140*.dll, vcruntime140*.dll, concrt140.dll   (MSVC runtime)
     qt.conf
@@ -86,7 +86,7 @@ license_creator_windows\
     README.md, USER_GUIDE.md, LICENSE.txt
 ```
 
-Extract it anywhere and start `license_creator.exe` - Qt6 and the MSVC runtime
+Extract it anywhere and start `Mojito.exe` - Qt6 and the MSVC runtime
 are bundled, so nothing has to be installed (Windows 10 or newer).
 
 Manual equivalent (from the `build` directory):

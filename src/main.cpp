@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     // the executable (see MainWindow::settingsPath()).
     QCoreApplication::setOrganizationName(QStringLiteral("Mojito"));
     QCoreApplication::setOrganizationDomain(QStringLiteral("mojito.local"));
-    QCoreApplication::setApplicationName(QStringLiteral("LicenseCreator"));
+    QCoreApplication::setApplicationName(QStringLiteral("Mojito"));
     QCoreApplication::setApplicationVersion(QStringLiteral("1.0.0"));
 
     // Set application icon from bundled resource

@@ -82,7 +82,7 @@ MainWindow::~MainWindow() = default;
 
 void MainWindow::buildUi()
 {
-    setWindowTitle(tr("License Creator"));
+    setWindowTitle(tr("Mojito"));
     setMinimumSize(760, 540);
     resize(1020, 700);
 
@@ -444,7 +444,7 @@ void MainWindow::saveSettings()
 QString MainWindow::settingsPath() const
 {
     return QCoreApplication::applicationDirPath()
-        + QStringLiteral("/license_creator.ini");
+        + QStringLiteral("/Mojito.ini");
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -987,8 +987,8 @@ void MainWindow::onAbout()
         appVersion = QStringLiteral("1.1.0");
 
     QMessageBox::about(
-        this, tr("About License Creator"),
-        tr("<p><b>License Creator</b> %1</p>"
+        this, tr("About Mojito"),
+        tr("<p><b>Mojito</b> %1</p>"
            "<p>%2</p>"
            "<p>Create LimeLM product keys and review registrations.</p>"
            "<p>Built with Qt %3.</p>")

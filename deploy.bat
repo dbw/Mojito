@@ -22,7 +22,7 @@ set "BUILD_DIR=%PROJECT_ROOT%\build"
 if not "%~1"=="" set "BUILD_DIR=%~1"
 
 set "CONFIG=Release"
-set "ZIP_NAME=license_creator_windows.zip"
+set "ZIP_NAME=Mojito_windows.zip"
 set "PACKAGE_DIR=%BUILD_DIR%\package"
 set "ZIP_PATH=%PACKAGE_DIR%\%ZIP_NAME%"
 
@@ -94,7 +94,7 @@ echo.
 echo [3/3] Verifying bundled Qt6 dependencies ...
 echo.
 
-set "ZIP_LIST=%TEMP%\license_creator_zip_contents.txt"
+set "ZIP_LIST=%TEMP%\Mojito_zip_contents.txt"
 tar -tf "%ZIP_PATH%" > "%ZIP_LIST%" 2>nul
 if errorlevel 1 (
     echo WARNING: Could not list the archive contents (tar unavailable^).
@@ -140,10 +140,10 @@ echo Deploy completed successfully!
 echo.
 echo ZIP archive: %PROJECT_ROOT%\%ZIP_NAME%
 echo.
-echo Contents: license_creator.exe, Qt6 DLLs, plugins\platforms\qwindows.dll,
+echo Contents: Mojito.exe, Qt6 DLLs, plugins\platforms\qwindows.dll,
 echo           MSVC runtime, README.md, LICENSE.txt
 echo.
-echo Extract the archive anywhere and start license_creator.exe - no
+echo Extract the archive anywhere and start Mojito.exe - no
 echo installation and no Qt/Visual C++ runtime required (Windows 10+).
 echo ============================================================================
 echo.

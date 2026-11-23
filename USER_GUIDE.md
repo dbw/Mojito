@@ -27,10 +27,10 @@ bundled with the application.
 
 ## 2. Starting the application
 
-Extract `license_creator_windows.zip` anywhere (a local folder, a USB stick,
-a network share) and start `license_creator.exe`.
+Extract `Mojito_windows.zip` anywhere (a local folder, a USB stick,
+a network share) and start `Mojito.exe`.
 
-The first start creates `license_creator.ini` in the same folder. It stores the
+The first start creates `Mojito.ini` in the same folder. It stores the
 window size and position, the API key, the last used customer email, and the
 last used version. Copy the whole folder to move the application and its
 settings to another computer.
@@ -162,7 +162,7 @@ switches back to the **Generate keys** tab.
 
 ## 9. Settings file
 
-`license_creator.ini` (next to `license_creator.exe`) contains:
+`Mojito.ini` (next to `Mojito.exe`) contains:
 
 ```ini
 [General]
