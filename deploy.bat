@@ -10,8 +10,9 @@
 ::   - Project must be configured first (run build.bat once)
 ::   - CMake/CPack and windeployqt (part of the Qt installation) available
 ::
-:: Usage: deploy [build_dir]
-::   build_dir   Optional: CMake build directory (default: <project>\build)
+:: Usage: deploy [build_dir] [installer_type]
+::   build_dir       Optional: CMake build directory (default: <project>\build)
+::   installer_type  Optional: "ZIP" (default) or "NSIS" for Windows installer
 ::============================================================================
 setlocal EnableExtensions
 
@@ -22,9 +23,13 @@ set "BUILD_DIR=%PROJECT_ROOT%\build"
 if not "%~1"=="" set "BUILD_DIR=%~1"
 
 set "CONFIG=Release"
+set "INSTALLER_TYPE=%~2"
+if "%INSTALLER_TYPE%"=="" set "INSTALLER_TYPE=ZIP"
 set "ZIP_NAME=Mojito_windows.zip"
 set "PACKAGE_DIR=%BUILD_DIR%\package"
 set "ZIP_PATH=%PACKAGE_DIR%\%ZIP_NAME%"
+set "NSIS_NAME=Mojito_installer.exe"
+set "NSIS_PATH=%PACKAGE_DIR%\%NSIS_NAME%"
 
 echo.
 echo ============================================================================
@@ -68,7 +73,11 @@ echo.
 echo [2/3] Running CPack (ZIP, Qt6 runtime deployment) ...
 echo.
 
-cpack -G ZIP -C %CONFIG% --config CPackConfig.cmake
+if /I "%INSTALLER_TYPE%"=="NSIS" (
+    cpack -G NSIS -C %CONFIG% --config CPackConfig.cmake
+) else (
+    cpack -G ZIP -C %CONFIG% --config CPackConfig.cmake
+)
 if errorlevel 1 (
     popd
     echo.
@@ -79,12 +88,22 @@ if errorlevel 1 (
 
 popd
 
-if not exist "%ZIP_PATH%" (
-    echo.
-    echo ERROR: CPack finished but the archive was not found:
-    echo   %ZIP_PATH%
-    pause
-    exit /b 1
+if /I "%INSTALLER_TYPE%"=="NSIS" (
+    if not exist "%NSIS_PATH%" (
+        echo.
+        echo ERROR: CPack finished but the installer was not found:
+        echo   %NSIS_PATH%
+        pause
+        exit /b 1
+    )
+) else (
+    if not exist "%ZIP_PATH%" (
+        echo.
+        echo ERROR: CPack finished but the archive was not found:
+        echo   %ZIP_PATH%
+        pause
+        exit /b 1
+    )
 )
 
 ::----------------------------------------------------------------------------
@@ -124,27 +143,46 @@ if defined MISSING (
 :copied
 del "%ZIP_LIST%" >nul 2>&1
 
-:: Copy the archive next to build.bat / deploy.bat for convenience
-copy /Y "%ZIP_PATH%" "%PROJECT_ROOT%\%ZIP_NAME%" >nul
-if errorlevel 1 (
-    echo.
-    echo NOTE: Could not copy the archive to the project root.
+:: Copy the archive/installer next to build.bat / deploy.bat for convenience
+if /I "%INSTALLER_TYPE%"=="NSIS" (
+    copy /Y "%NSIS_PATH%" "%PROJECT_ROOT%\%NSIS_NAME%" >nul
+    if errorlevel 1 (
+        echo.
+        echo NOTE: Could not copy the installer to the project root.
+    ) else (
+        echo.
+        echo Copied installer to: %PROJECT_ROOT%\%NSIS_NAME%
+    )
 ) else (
-    echo.
-    echo Copied archive to: %PROJECT_ROOT%\%ZIP_NAME%
+    copy /Y "%ZIP_PATH%" "%PROJECT_ROOT%\%ZIP_NAME%" >nul
+    if errorlevel 1 (
+        echo.
+        echo NOTE: Could not copy the archive to the project root.
+    ) else (
+        echo.
+        echo Copied archive to: %PROJECT_ROOT%\%ZIP_NAME%
+    )
 )
 
 echo.
 echo ============================================================================
 echo Deploy completed successfully!
 echo.
-echo ZIP archive: %PROJECT_ROOT%\%ZIP_NAME%
-echo.
-echo Contents: Mojito.exe, Qt6 DLLs, plugins\platforms\qwindows.dll,
-echo           MSVC runtime, README.md, LICENSE.txt
-echo.
-echo Extract the archive anywhere and start Mojito.exe - no
-echo installation and no Qt/Visual C++ runtime required (Windows 10+).
+if /I "%INSTALLER_TYPE%"=="NSIS" (
+    echo Installer: %PROJECT_ROOT%\%NSIS_NAME%
+    echo.
+    echo Run the installer to install Mojito on your system.
+    echo The installer includes Mojito.exe, Qt6 DLLs, plugins\platforms\qwindows.dll,
+    echo MSVC runtime, README.md, LICENSE.txt
+) else (
+    echo ZIP archive: %PROJECT_ROOT%\%ZIP_NAME%
+    echo.
+    echo Contents: Mojito.exe, Qt6 DLLs, plugins\platforms\qwindows.dll,
+    echo           MSVC runtime, README.md, LICENSE.txt
+    echo.
+    echo Extract the archive anywhere and start Mojito.exe - no
+    echo installation and no Qt/Visual C++ runtime required (Windows 10+).
+)
 echo ============================================================================
 echo.
 

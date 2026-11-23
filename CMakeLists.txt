@@ -189,7 +189,7 @@ install(FILES
 #------------------------------------------------------------------------------
 # CPack configuration - portable ZIP for Windows 10+
 #------------------------------------------------------------------------------
-set(CPACK_GENERATOR "ZIP")
+set(CPACK_GENERATOR "ZIP;NSIS")
 set(CPACK_PACKAGE_NAME "Mojito")
 set(CPACK_PACKAGE_VENDOR "Mojito")
 set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
@@ -198,5 +198,20 @@ set(CPACK_PACKAGE_DIRECTORY "${CMAKE_BINARY_DIR}/package")
 set(CPACK_PACKAGE_CHECKSUM "SHA256")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+
+# NSIS installer settings
+set(CPACK_NSIS_DISPLAY_NAME "Mojito")
+set(CPACK_NSIS_PACKAGE_NAME "Mojito")
+set(CPACK_NSIS_INSTALLED_ICON_NAME "Mojito.exe")
+set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/images/app.ico")
+set(CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}/images/app.ico")
+set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+set(CPACK_NSIS_MODIFY_PATH OFF)
+set(CPACK_NSIS_CREATE_ICONS_EXTRA
+    "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Mojito.lnk' '$INSTDIR\\\\Mojito.exe'"
+)
+set(CPACK_NSIS_DELETE_ICONS_EXTRA
+    "Delete '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Mojito.lnk'"
+)
 
 include(CPack)
