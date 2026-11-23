@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="G:\Projekte\Mojito\build\CMakeFiles\96f7c9fea6cb1844b8bd3ff5b2884e96\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{2BDFF4D2-8C2F-36BB-AB3D-1DC4CB5F9FA4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

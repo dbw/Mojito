@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix=":/">
+        <file>images/Mojito Key Icon.png</file>
+    </qresource>
+</RCC>
