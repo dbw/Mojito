@@ -870,6 +870,11 @@ void MainWindow::onCustomFieldsLoaded(const QVector<CustomField> &fields,
                                                      QStringLiteral("yyyy-MM-dd HH:mm:ss"));
                 if (dt.isValid())
                     dateTimeEdit->setDateTime(dt);
+                else
+                    dateTimeEdit->setDateTime(QDateTime::currentDateTime().addYears(1));
+            } else {
+                // No default value: set to one year from now
+                dateTimeEdit->setDateTime(QDateTime::currentDateTime().addYears(1));
             }
             m_customFieldsTable->setCellWidget(row, 1, dateTimeEdit);
         } else {
