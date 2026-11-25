@@ -14,7 +14,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent)
     // API key field
     m_apiKeyEdit = new QLineEdit(this);
     m_apiKeyEdit->setEchoMode(QLineEdit::Password);
-    m_apiKeyEdit->setPlaceholderText(tr("Enter your LimeLM API key"));
+    m_apiKeyEdit->setPlaceholderText(tr("Enter your API key"));
     m_apiKeyEdit->setTextMargins(4, 4, 4, 4);
 
     // Show/hide toggle
@@ -36,7 +36,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent)
     mainLayout->setContentsMargins(12, 12, 12, 12);
     mainLayout->setSpacing(8);
 
-    auto *keyGroup = new QGroupBox(tr("LimeLM API Key"), this);
+    auto *keyGroup = new QGroupBox(tr("API Key"), this);
     auto *keyForm = new QFormLayout(keyGroup);
     keyForm->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
     keyForm->addRow(tr("&API key:"), keyLayout);
@@ -65,16 +65,16 @@ void PreferencesDialog::onOk()
 {
     const QString key = m_apiKeyEdit->text().trimmed();
 
-    // Basic validation: LimeLM API keys are typically 32+ characters, alphanumeric with hyphens
+    // Basic validation: API keys are typically 32+ characters, alphanumeric with hyphens
     if (!key.isEmpty()) {
         // Check if it looks like a valid API key format (basic check)
-        // LimeLM keys format: XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX
+        // Keys format: XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX
         // Or just a long alphanumeric string
         QRegularExpression keyPattern(QStringLiteral("^[a-zA-Z0-9\\-]{20,}$"));
         if (!keyPattern.match(key).hasMatch()) {
             QMessageBox::warning(this, tr("Invalid API Key"),
                 tr("The API key you entered does not appear to be a valid format.\n\n"
-                   "LimeLM API keys are typically 32+ alphanumeric characters.\n"
+                   "API keys are typically 32+ alphanumeric characters.\n"
                    "You can still save it, but you may want to verify it."));
         }
     }
@@ -92,16 +92,16 @@ void PreferencesDialog::onApply()
 {
     const QString key = m_apiKeyEdit->text().trimmed();
 
-    // Basic validation: LimeLM API keys are typically 32+ characters, alphanumeric with hyphens
+    // Basic validation: API keys are typically 32+ characters, alphanumeric with hyphens
     if (!key.isEmpty()) {
         // Check if it looks like a valid API key format (basic check)
-        // LimeLM keys format: XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX
+        // Keys format: XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX
         // Or just a long alphanumeric string
         QRegularExpression keyPattern(QStringLiteral("^[a-zA-Z0-9\\-]{20,}$"));
         if (!keyPattern.match(key).hasMatch()) {
             QMessageBox::warning(this, tr("Invalid API Key"),
                 tr("The API key you entered does not appear to be a valid format.\n\n"
-                   "LimeLM API keys are typically 32+ alphanumeric characters.\n"
+                   "API keys are typically 32+ alphanumeric characters.\n"
                    "You can still save it, but you may want to verify it."));
         }
     }

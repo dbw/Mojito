@@ -14,7 +14,7 @@ namespace {
 
 const char *kApiEndpoint = "https://wyday.com/limelm/api/rest/";
 
-// LimeLM returns XML attributes as strings in its JSON representation, but be
+// Returns XML attributes as strings in its JSON representation, but be
 // tolerant and accept plain JSON numbers/booleans as well.
 QString jsonString(const QJsonValue &value)
 {
@@ -45,7 +45,7 @@ bool jsonBool(const QJsonValue &value)
         || text == QLatin1String("yes");
 }
 
-// LimeLM JSON uses an object for a single element and an array for repeated
+// JSON uses an object for a single element and an array for repeated
 // elements. Normalize both shapes to an array.
 QJsonArray jsonArray(const QJsonValue &value)
 {
@@ -133,7 +133,7 @@ QNetworkReply *WebAPI::post(const QString &method,
     QUrlQuery query;
     query.addQueryItem(QStringLiteral("method"), method);
     query.addQueryItem(QStringLiteral("api_key"), m_apiKey);
-    // Ask for raw JSON instead of the jsonLimeLMApi({...}) wrapper.
+    // Ask for raw JSON instead of the JSONP wrapper.
     query.addQueryItem(QStringLiteral("format"), QStringLiteral("json"));
     query.addQueryItem(QStringLiteral("nojsoncallback"), QStringLiteral("1"));
 
@@ -160,7 +160,7 @@ QNetworkReply *WebAPI::post(const QString &method,
 void WebAPI::loadProducts()
 {
     if (!hasAPIKey()) {
-        emit productsLoaded({}, tr("No LimeLM API key is configured."));
+        emit productsLoaded({}, tr("No API key is configured."));
         return;
     }
 
@@ -172,7 +172,7 @@ void WebAPI::loadRegistrations(int page, int perPage, const QString &versionId,
 {
     if (!hasAPIKey()) {
         emit registrationsLoaded({}, page, 0, 0,
-                                 tr("No LimeLM API key is configured."));
+                                 tr("No API key is configured."));
         return;
     }
 
@@ -197,7 +197,7 @@ void WebAPI::generateKeys(const QString &versionId, int numKeys, int numActs,
                           const QMap<QString, QString> &customFields)
 {
     if (!hasAPIKey()) {
-        emit keysGenerated({}, tr("No LimeLM API key is configured."));
+        emit keysGenerated({}, tr("No API key is configured."));
         return;
     }
 
@@ -224,7 +224,7 @@ void WebAPI::loadCustomFields(const QString &versionId)
 {
     if (!hasAPIKey()) {
         emit customFieldsLoaded({}, versionId,
-                               tr("No LimeLM API key is configured."));
+                               tr("No API key is configured."));
         return;
     }
 
@@ -239,7 +239,7 @@ void WebAPI::loadCustomFields(const QString &versionId)
 void WebAPI::loadProductKeyDetails(const QString &pkeyId)
 {
     if (!hasAPIKey()) {
-        emit productKeyDetailsLoaded(ProductKeyDetail{}, tr("No LimeLM API key is configured."));
+        emit productKeyDetailsLoaded(ProductKeyDetail{}, tr("No API key is configured."));
         return;
     }
 
@@ -285,9 +285,9 @@ void WebAPI::handleReply(QNetworkReply *reply, RequestType type)
 
     if (networkError != QNetworkReply::NoError) {
         if (networkError == QNetworkReply::OperationCanceledError)
-            fail(tr("The request to the LimeLM server timed out."));
+            fail(tr("The request to the server timed out."));
         else
-            fail(tr("Could not reach the LimeLM server: %1").arg(networkErrorText));
+            fail(tr("Could not reach the server: %1").arg(networkErrorText));
         return;
     }
 
@@ -295,9 +295,9 @@ void WebAPI::handleReply(QNetworkReply *reply, RequestType type)
     const QJsonDocument document = QJsonDocument::fromJson(body, &parseError);
     if (document.isNull() || !document.isObject()) {
         if (httpStatus >= 400) {
-            fail(tr("The LimeLM server returned HTTP %1.").arg(httpStatus));
+            fail(tr("The server returned HTTP %1.").arg(httpStatus));
         } else {
-            fail(tr("The LimeLM server returned an unexpected response: %1")
+            fail(tr("The server returned an unexpected response: %1")
                      .arg(parseError.errorString()));
         }
         return;
@@ -391,7 +391,7 @@ void WebAPI::handleReply(QNetworkReply *reply, RequestType type)
         QVector<CustomField> fields;
         // The response is <fields><field .../></fields>
         QJsonObject fieldsObject = root.value(QStringLiteral("fields")).toObject();
-        // LimeLM might return fields as an array directly
+        // Might return fields as an array directly
         if (fieldsObject.isEmpty() && root.contains(QStringLiteral("field"))) {
             fieldsObject = root;
         }

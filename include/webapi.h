@@ -10,7 +10,7 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 
-// A single version of a product, as returned by limelm.prod.getAll.
+// A single version of a product, as returned by the API.
 struct ProductVersion
 {
     QString id;
@@ -25,8 +25,7 @@ struct Product
     QVector<ProductVersion> versions;
 };
 
-// A product key / registration, as returned by limelm.pkey.advancedSearch
-// and limelm.pkey.generate.
+// A product key / registration, as returned by the API.
 struct ProductKey
 {
     QString id;
@@ -74,7 +73,7 @@ struct ProductKeyDetail
     QVector<QString> tags;
 };
 
-// Thin client for the LimeLM Web API (https://wyday.com/limelm/help/api/).
+// Thin client for the Web API.
 // Every request is asynchronous; results are delivered through the signals
 // below. An empty error string means the request succeeded.
 class WebAPI : public QObject
@@ -88,26 +87,26 @@ public:
     QString apiKey() const;
     bool hasAPIKey() const;
 
-    // limelm.prod.getAll - all products and their versions.
+    // Load all products and their versions.
     void loadProducts();
 
-    // limelm.pkey.advancedSearch - registrations (product keys).
+    // Load registrations (product keys).
     // versionId: optional version filter (empty = all versions).
     // emailFilter: optional email filter, supports the '*' wildcard.
     void loadRegistrations(int page = 1, int perPage = 50,
                            const QString &versionId = QString(),
                            const QString &emailFilter = QString());
 
-    // limelm.pkey.generate - create new product keys.
+    // Generate new product keys.
     // customFields: optional map of custom license field name -> value.
     void generateKeys(const QString &versionId, int numKeys, int numActs,
                       const QString &email,
                       const QMap<QString, QString> &customFields = {});
 
-    // limelm.feature.getAll - custom license fields for a version.
+    // Load custom license fields for a version.
     void loadCustomFields(const QString &versionId);
 
-    // limelm.pkey.getDetails - full details for a single product key.
+    // Load full details for a single product key.
     void loadProductKeyDetails(const QString &pkeyId);
 
 signals:

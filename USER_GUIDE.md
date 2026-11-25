@@ -1,10 +1,18 @@
 # License Creator - User Guide
 
-License Creator is a small Windows program for managing [LimeLM](https://wyday.com/limelm/)
-licensing from your desktop. It can:
+> **DISCLAIMER**
+>
+> - This product is in no way associated with LimeLM or wyDay. Those are registered trademarks in several countries.
+> - This product was extruded in-whole or in-part using "ai" / language models.
+> - This product violates the security practices listed here: https://wyday.com/limelm/help/account-security/
+> - This product will fail if it's used across more than one IP address and may cause the user to be locked out of their account.
+> - This product may violate the wyDay Terms of Service (and cause a user to be locked out of their account) if more than one person uses a web API key. https://wyday.com/limelm/terms/
 
-- create product keys (licenses) for a LimeLM product version,
-- list the products and versions in your LimeLM account,
+Mojito is a small Windows program for managing product licensing from your
+desktop. It can:
+
+- create product keys (licenses) for a product version,
+- list the products and versions in your account,
 - look up existing registrations (product keys), including their activation
   state and the customer email they belong to.
 
@@ -16,9 +24,9 @@ settings next to the executable.
 ## 1. Requirements
 
 - Windows 10 or newer (64-bit).
-- A LimeLM account with at least one product and one version.
-- Your LimeLM **API key**: log in to LimeLM, open **Settings → API key**
-  (<https://wyday.com/limelm/settings/#api-key>) and copy the key.
+- An account with at least one product and one version.
+- Your **API key**: log in to your account, open **Settings → API key**
+  and copy the key.
 
 No Qt installation and no Visual C++ Redistributable is required - both are
 bundled with the application.
@@ -41,9 +49,9 @@ settings to another computer.
 
 ---
 
-## 3. Connecting to LimeLM
+## 3. Connecting to the Service
 
-At the top of the window, in the **LimeLM connection** area:
+At the top of the window, in the **Connection** area:
 
 1. Paste your API key into **API key**. Use the **Show** checkbox if you want to
    check what you pasted.
@@ -54,9 +62,8 @@ At the top of the window, in the **LimeLM connection** area:
 
 The version dropdown shows the version name and stores the numeric version ID.
 If the product list cannot be loaded, you can type the version ID directly into
-the version field. You can find IDs in LimeLM: open a product or version in the
-browser; the number in the URL is the ID, e.g.
-`https://wyday.com/limelm/version/100/` → version ID `100`.
+the version field. You can find IDs in your account dashboard: open a product
+or version in the browser; the number in the URL is the ID.
 
 ## 4. The window
 
@@ -83,7 +90,7 @@ The status bar at the bottom shows progress and the result of the last action.
 
 ## 5. Generating keys
 
-1. Select the product version in the **LimeLM connection** area.
+1. Select the product version in the **Connection** area.
 2. Open the **Generate keys** tab.
 3. Fill in:
    - **Customer email** - optional. When set, the keys are associated with this
@@ -103,7 +110,7 @@ Each generation is appended, so you can create several batches in one session.
 - **Save keys to file...** writes the most recent batch to a text file, one key
   per line.
 
-The keys also exist in your LimeLM account immediately - if the program is
+The keys also exist in your account immediately - if the program is
 closed before you save them, open the **Registrations** tab and find them
 there.
 
@@ -111,13 +118,13 @@ there.
 
 ## 6. Registrations (existing product keys)
 
-The **Registrations** tab lists the product keys stored in your LimeLM account.
+The **Registrations** tab lists the product keys stored in your account.
 
 - **Refresh** loads the first page.
 - **Email filter** narrows the list to one customer. Use `*` as a wildcard,
   e.g. `*@example.com`. Press Enter or click **Search**.
 - **Only selected version** limits the search to the version selected in the
-  LimeLM connection area. Unchecked (the default) searches all versions.
+  connection area. Unchecked (the default) searches all versions.
 - **Previous / Next** page through the results. Each page contains up to 50
   registrations; the page label shows the current page and the number of pages.
 
@@ -125,11 +132,11 @@ Columns:
 
 | Column | Meaning |
 | --- | --- |
-| **Key** | The product key. Hover it to see the internal LimeLM key ID. |
+| **Key** | The product key. Hover it to see the internal key ID. |
 | **Email** | The customer email associated with the key (may be empty). |
 | **Activations** | Number of activations allowed for this key. |
 | **Used** | Number of activations used so far. |
-| **Revoked** | Whether the key has been revoked in LimeLM. |
+| **Revoked** | Whether the key has been revoked. |
 
 Rows can be selected (Ctrl/Shift for multiple rows) so the key text can be
 copied with Ctrl+C.
@@ -141,7 +148,7 @@ copied with Ctrl+C.
 The **Products** tab shows every product in your account with its versions:
 
 - **Product / version** - the display name.
-- **ID** - the numeric LimeLM product or version ID.
+- **ID** - the numeric product or version ID.
 - **Type** - `Product` or `Version`.
 
 Double-click a version to select it for key generation; the application
@@ -179,7 +186,7 @@ currentTab=0
 > **Security note:** the API key is stored in plain text in this file, because
 > the application must be able to use it without asking every time. Keep the
 > application folder on a trusted, access-controlled drive, or delete the
-> `apiKey` line after use. Anyone with the file can manage your LimeLM account
+> `apiKey` line after use. Anyone with the file can manage your account
 > through the API.
 
 ---
@@ -188,24 +195,24 @@ currentTab=0
 
 | Message | Meaning / solution |
 | --- | --- |
-| **No LimeLM API key is configured** | Paste your API key into the connection area. |
-| **error 100 - Invalid API Key** | The key was copied incompletely or has been reset in LimeLM. Copy it again from the LimeLM settings page. |
-| **error 164 - API key must be used by X devices** | LimeLM limits how many computers may use one API key. Reset the last used IP address in LimeLM's settings, or create a separate API key for this computer. |
-| **error 167 - No products found** | The account has no products yet. Create a product and a version in LimeLM first. |
-| **error 142 - Service currently unavailable** | LimeLM is temporarily unavailable; try again later. |
-| **Could not reach the LimeLM server / timed out** | Check your internet connection, proxy or firewall. The application needs HTTPS access to `wyday.com`. |
+| **No API key is configured** | Paste your API key into the connection area. |
+| **error 100 - Invalid API Key** | The key was copied incompletely or has been reset. Copy it again from the settings page. |
+| **error 164 - API key must be used by X devices** | The service limits how many computers may use one API key. Reset the last used IP address in your settings, or create a separate API key for this computer. |
+| **error 167 - No products found** | The account has no products yet. Create a product and a version first. |
+| **error 142 - Service currently unavailable** | The service is temporarily unavailable; try again later. |
+| **Could not reach the server / timed out** | Check your internet connection, proxy or firewall. The application needs HTTPS access to the API endpoint. |
 | **Generate keys stays disabled** | An API key and a version must both be set. If the product list cannot be loaded, type the numeric version ID into the version field. |
 | **"No products found" after entering a valid key** | Click **Refresh products**; make sure the API key belongs to the account that owns the products. |
 | **Settings could not be saved** | The application folder is read-only. Move the folder to a writable location. |
 
 All requests are sent over HTTPS to `https://wyday.com/limelm/api/rest/`.
-Keys are never generated locally - they always come from LimeLM, so generated
+Keys are never generated locally - they always come from the service, so generated
 keys are valid immediately.
 
 ---
 
 ## 11. Where to get help
 
-- LimeLM Web API reference: <https://wyday.com/limelm/help/api/>
-- LimeLM product and version management: <https://wyday.com/limelm/dashboard/>
+- Web API reference: <https://wyday.com/limelm/help/api/>
+- Product and version management: <https://wyday.com/limelm/dashboard/>
 - This guide is also included in the application folder as `USER_GUIDE.md`.

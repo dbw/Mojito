@@ -97,9 +97,9 @@ void MainWindow::buildUi()
     rootLayout->setSpacing(8);
 
     //---------------------------------------------------------------------
-    // LimeLM connection
+    // Connection
     //---------------------------------------------------------------------
-    auto *connectionGroup = new QGroupBox(tr("LimeLM connection"), central);
+    auto *connectionGroup = new QGroupBox(tr("Connection"), central);
     auto *connectionForm = new QFormLayout(connectionGroup);
     connectionForm->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
 
@@ -510,7 +510,7 @@ void MainWindow::onApiKeyChanged(const QString &text)
         m_api->setAPIKey(text);
 
     if (text.trimmed().isEmpty())
-        statusBar()->showMessage(tr("Enter your LimeLM API key via Settings."), 5000);
+        statusBar()->showMessage(tr("Enter your API key via Settings."), 5000);
 
     updateControls();
 }
@@ -686,7 +686,7 @@ void MainWindow::selectVersionInTree(const QString &versionId)
 void MainWindow::onRefreshProducts()
 {
     if (!m_api || !m_api->hasAPIKey()) {
-        statusBar()->showMessage(tr("Enter your LimeLM API key first."), 5000);
+        statusBar()->showMessage(tr("Enter your API key first."), 5000);
         return;
     }
 
@@ -710,7 +710,7 @@ void MainWindow::onProductsLoaded(const QVector<Product> &products,
 
     if (products.isEmpty()) {
         statusBar()->showMessage(
-            tr("No products found in this LimeLM account."), 8000);
+            tr("No products found in this account."), 8000);
     } else {
         statusBar()->showMessage(
             tr("Loaded %n product(s).", "", products.size()), 5000);
@@ -746,13 +746,13 @@ void MainWindow::onGenerate()
 {
     if (!m_api) {
         showError(tr("Generate keys"),
-                  tr("The LimeLM API client is not available."));
+                  tr("The API client is not available."));
         return;
     }
 
     if (!m_api->hasAPIKey()) {
         showError(tr("Generate keys"),
-                  tr("Please enter your LimeLM API key first."));
+                  tr("Please enter your API key first."));
         return;
     }
 
@@ -812,7 +812,7 @@ void MainWindow::onKeysGenerated(const QVector<ProductKey> &keys,
 
     if (keys.isEmpty()) {
         statusBar()->showMessage(
-            tr("The LimeLM server did not return any keys."), 8000);
+            tr("The server did not return any keys."), 8000);
         return;
     }
 
@@ -1006,7 +1006,7 @@ void MainWindow::onSearchRegistrations()
 void MainWindow::onRefreshRegistrations()
 {
     if (!m_api || !m_api->hasAPIKey()) {
-        statusBar()->showMessage(tr("Enter your LimeLM API key first."), 5000);
+        statusBar()->showMessage(tr("Enter your API key first."), 5000);
         return;
     }
 
@@ -1165,10 +1165,10 @@ void MainWindow::onAbout()
         this, tr("About Mojito"),
         tr("<p><b>Mojito</b> %1</p>"
            "<p>%2</p>"
-           "<p>Create LimeLM product keys and review registrations.</p>"
+           "<p>Create product keys and review registrations.</p>"
            "<p>Built with Qt %3.</p>")
             .arg(appVersion,
-                 tr("A Desktop Manager for LimeLM"),
+                 tr("A Desktop Manager"),
                  QString::fromLatin1(qVersion())));
 }
 

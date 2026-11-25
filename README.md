@@ -1,16 +1,24 @@
 # Mojito
 
-*A Desktop Manager for LimeLM*
+*A Desktop Manager*
 
 ![Mojito Header](images/mojito_cocktail_icon_transparent_trimmed.png)
 
+> **DISCLAIMER**
+>
+> - This product is in no way associated with LimeLM or wyDay. Those are registered trademarks in several countries.
+> - This product was extruded in-whole or in-part using "ai" / language models.
+> - This product violates the security practices listed here: https://wyday.com/limelm/help/account-security/
+> - This product will fail if it's used across more than one IP address and may cause the user to be locked out of their account.
+> - This product may violate the wyDay Terms of Service (and cause a user to be locked out of their account) if more than one person uses a web API key. https://wyday.com/limelm/terms/
+
 A portable Qt application for creating and reviewing license keys using the
-[LimeLM WebAPI](https://wyday.com/limelm/).
+Web API.
 
 ## Features
 
-- Create product keys for any LimeLM product version
-- Browse the products and versions of your LimeLM account
+- Create product keys for any product version
+- Browse the products and versions of your account
 - Browse, search and page through registrations (existing product keys)
 - Copy generated keys to the clipboard or save them to a text file
 - Fully resizable, single-window UI with tabs
@@ -26,19 +34,19 @@ A portable Qt application for creating and reviewing license keys using the
 
 ## WebAPI Setup
 
-This application uses the LimeLM WebAPI. The API client code (`include/webapi.h`,
+This application uses a Web API. The API client code (`include/webapi.h`,
 `src/webapi.cpp`) is provided in the repository, but you need to obtain the full
-WebAPI PHP implementation from LimeLM and copy it to the `WebAPI/PHP/` directory.
+WebAPI PHP implementation and copy it to the `WebAPI/PHP/` directory.
 
-1. Log in to your LimeLM account at <https://wyday.com/limelm/dashboard/>
+1. Log in to your account at the service provider's dashboard
 2. Go to **Settings → API key** and note your API key
-3. Download the LimeLM WebAPI PHP from <https://wyday.com/limelm/downloads/>
+3. Download the WebAPI PHP from the service provider's downloads page
 4. Extract the PHP files and copy them to `WebAPI/PHP/` directory in this project
-5. The application requires the `LimeLM.php` file which contains the `PostRequest()`
+5. The application requires the API client file which contains the `PostRequest()`
    and `SetAPIKey()` functions used by the C++ WebAPI client
 
 Without the WebAPI PHP files, the application will not be able to generate or
-lookup license keys via the LimeLM API.
+lookup license keys via the API.
 
 ## Building
 
@@ -99,7 +107,7 @@ cpack -G ZIP -C Release
 
 ## Usage
 
-1. Paste your LimeLM API key into the connection area. The application loads
+1. Paste your API key into the connection area. The application loads
    your products and versions automatically.
 2. Select a product and a version.
 3. Open the **Generate keys** tab, enter the customer email (optional), the
@@ -115,7 +123,7 @@ including keyboard shortcuts, the settings file and troubleshooting.
 
 | Path | Contents |
 | --- | --- |
-| `include/webapi.h`, `src/webapi.cpp` | LimeLM Web API client (products, registrations, key generation) |
+| `include/webapi.h`, `src/webapi.cpp` | Web API client (products, registrations, key generation) |
 | `include/mainwindow.h`, `src/mainwindow.cpp` | Main window and tabs |
 | `src/main.cpp` | Application entry point |
 | `CMakeLists.txt` | Build, Qt deployment and CPack configuration |
